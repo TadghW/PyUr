@@ -9,7 +9,7 @@ def distribute_pieces(board: dict, pieces: dict) -> dict:
     
     # This function does no state checking, it just distributes pieces
 
-    for piece in pieces["p1_pieces"]:
+    for piece in pieces[1]:
         pos = piece["position"]
         if pos == 0:
             board["p1_sideline"].append(piece)
@@ -20,7 +20,7 @@ def distribute_pieces(board: dict, pieces: dict) -> dict:
         elif 13 <= pos <= 14:
             board["p1_private_2"][pos - 13] = piece
 
-    for piece in pieces["p2_pieces"]:
+    for piece in pieces[2]:
         pos = piece["position"]
         if pos == 0:
             board["p2_sideline"].append(piece)
@@ -81,7 +81,7 @@ def compose_screen(game_state: dict) -> str:
     sidelines_2 = draw_sideline(game_state["board"]["p2_sideline"])
     
     round = f"Round {game_state["round"]}"
-    turn_count = f"Player {game_state["active_player"]}, turn {game_state["consecutive_turn_count"""]}"
+    turn_count = f"Player {game_state["active_player"]}, turn {game_state["consecutive_turn_count"]}"
     
     roll = f"You rolled {game_state["last_roll"][0]}, {game_state["last_roll"][1]}, and {game_state["last_roll"][2]}. You net {game_state["movement_points"]} movement points."
     
