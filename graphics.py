@@ -1,17 +1,15 @@
-from types import Tuple
-
 private_path_1_default = ["", "", "", "*"]
 private_path_2_default = ["", "*"]
 shared_path_default = ["", "", "", "*", "", "", "", ""]
 
 
 def distribute_pieces(board: dict, pieces: dict) -> dict:
-    
+
     # This function does no state checking, it just distributes pieces
 
-    for piece in pieces[1]:
-        pos = piece["position"]
-        if pos == 0:
+    for piece, piece_data in pieces[1].items():
+        pos = piece_data["position"]
+        if pos == 0 and piece not in board["p1_sideline"]:
             board["p1_sideline"].append(piece)
         elif 1 <= pos <= 4:
             board["p1_private_1"][pos - 1] = piece
@@ -20,9 +18,9 @@ def distribute_pieces(board: dict, pieces: dict) -> dict:
         elif 13 <= pos <= 14:
             board["p1_private_2"][pos - 13] = piece
 
-    for piece in pieces[2]:
-        pos = piece["position"]
-        if pos == 0:
+    for piece, piece_data in pieces[2].items():
+        pos = piece_data["position"]
+        if pos == 0 and piece not in board["p2_sideline"]:
             board["p2_sideline"].append(piece)
         elif 1 <= pos <= 4:
             board["p2_private_1"][pos - 1] = piece
@@ -67,27 +65,47 @@ def compose_screen(game_state: dict) -> str:
     space = ""
     title = "*** PyUr ***"
 
-    game_state["board"] = distribute_pieces(game_state["pieces"],
-                                            game_state["board"])
-    
-    sidelines_1 = draw_sideline(game_state["board"]["p1_sideline"])
-    private_1 = draw_private(game_state["board"]["p1_private_1"],
-                             game_state["board"]["p1_private_2"])
-    
-    shared = draw_row(game_state["board"]["shared_path"])
-    
-    private_2 = draw_private(game_state["board"]["p2_private_1"],
-                             game_state["board"]["p2_private_2"])
-    sidelines_2 = draw_sideline(game_state["board"]["p2_sideline"])
-    
-    round = f"Round {game_state["round"]}"
-    turn_count = f"Player {game_state["active_player"]}, turn {game_state["consecutive_turn_count"]}"
-    
-    roll = f"You rolled {game_state["last_roll"][0]}, {game_state["last_roll"][1]}, and {game_state["last_roll"][2]}. You net {game_state["movement_points"]} movement points."
-    
-    status = game_state["board"]["status"]
+    game_state["board"] = distribute_pieces(game_state["board"], game_state["pieces"])
 
-    lines = [space, title, space, sidelines_1, private_1, shared, private_2,
-             sidelines_2, space, round, turn_count, roll, status]
-    
+    sidelines_1 = draw_sideline(game_state["board"]["p1_sideline"])
+    private_1 = draw_private(
+        game_state["board"]["p1_private_1"], game_state["board"]["p1_private_2"]
+    )
+
+    shared = draw_row(game_state["board"]["shared"])
+
+    private_2 = draw_private(
+        game_state["board"]["p2_private_1"], game_state["board"]["p2_private_2"]
+    )
+    sidelines_2 = draw_sideline(game_state["board"]["p2_sideline"])
+
+    round = f"Round {game_state["round"]}"
+    turn_count = f"Player {game_state["active_player"]}, Move {game_state["consecutive_turn_count"]}"
+
+    roll = f"You rolled {game_state["last_roll"][0]}, {game_state["last_roll"][1]}, and {game_state["last_roll"][2]}. You have {game_state["movement_points"]} movement points."
+    if game_state["last_roll"] == [1, 1, 1]:
+        roll += " You rolled an extra move!"
+
+    status = game_state["status"]
+
+    lines = [
+        space,
+        title,
+        space,
+        sidelines_1,
+        private_1,
+        shared,
+        private_2,
+        sidelines_2,
+        space,
+        round,
+        turn_count,
+        roll,
+        status,
+    ]
+
     return "\n".join(lines)
+
+
+def render_screenspace(game_state) -> None:
+    print(compose_screen(game_state))
